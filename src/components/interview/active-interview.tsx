@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import type { InterviewQuestion } from '@/lib/types';
 
-const mockQuestions = [
+const fallbackQuestions = [
     "Tell me about a time you faced a challenge at work.",
     "What are your biggest strengths and weaknesses?",
     "Where do you see yourself in 5 years?",
@@ -47,13 +47,12 @@ export function ActiveInterview() {
       const industry = searchParams.get('industry') || 'Technology';
       const interviewLength = parseInt(searchParams.get('interviewLength') || '5', 10);
       try {
-        // const result = await generateInterviewQuestions({ jobRole, industry, numQuestions: interviewLength });
-        // setQuestions(result.questions);
-        setQuestions(mockQuestions.slice(0, interviewLength)); // Using mock questions for now
+        const result = await generateInterviewQuestions({ jobRole, industry, numQuestions: interviewLength });
+        setQuestions(result.questions);
       } catch (error) {
         console.error("Failed to generate questions:", error);
-        toast({ title: "Error", description: "Could not fetch interview questions. Using defaults.", variant: "destructive" });
-        setQuestions(mockQuestions);
+        toast({ title: "Error", description: "Could not fetch AI questions. Using defaults.", variant: "destructive" });
+        setQuestions(fallbackQuestions.slice(0, interviewLength));
       } finally {
         setIsLoading(false);
       }
@@ -159,7 +158,7 @@ export function ActiveInterview() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-lg text-muted-foreground">Preparing your interview...</p>
+        <p className="text-lg text-muted-foreground">Preparing your interview questions...</p>
       </div>
     );
   }
