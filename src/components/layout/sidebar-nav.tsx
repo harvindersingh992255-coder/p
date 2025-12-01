@@ -52,7 +52,7 @@ export function SidebarNav() {
         <SidebarMenu>
           {primaryNav.map((item) => (
             <SidebarMenuItem key={item.name}>
-              <Link href={item.href} passHref legacyBehavior>
+              <Link href={item.href} passHref>
                 <SidebarMenuButton as="a" isActive={isActive(item.href)} tooltip={item.name}>
                   <item.icon />
                   <span>{item.name}</span>
@@ -67,7 +67,7 @@ export function SidebarNav() {
           <SidebarMenu>
             {secondaryNav.map((item) => (
               <SidebarMenuItem key={item.name}>
-                <Link href={item.href} passHref legacyBehavior>
+                <Link href={item.href} passHref>
                   <SidebarMenuButton as="a" isActive={isActive(item.href)} tooltip={item.name}>
                     <item.icon />
                     <span>{item.name}</span>
@@ -81,7 +81,7 @@ export function SidebarNav() {
       <div>
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/profile" passHref legacyBehavior>
+            <Link href="/profile" passHref>
               <SidebarMenuButton as="a" isActive={isActive('/profile')} tooltip="Profile">
                 <User />
                 <span>Profile</span>
