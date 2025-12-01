@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Loader2, Wand2, UploadCloud, FileCheck2, Lock } from 'lucide-react';
+import { FileText, Loader2, Wand2, UploadCloud, FileCheck2, Lock, ListChecks, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
+import { Progress } from '@/components/ui/progress';
 
 // MOCK: In a real app, this would come from user authentication
 const userPlan = 'Free'; // 'Free', 'Premium', or 'Super'
@@ -30,10 +30,19 @@ export default function ResumeAnalyzerPage() {
     if (isPremiumFeature) return;
     const file = event.target.files?.[0];
     if (file) {
-      if (file.type === 'application/pdf' || file.type === 'text/plain') {
+      if (file.type === 'application/pdf' || file.type === 'text/plain' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         const reader = new FileReader();
-        reader.onload = (e) => {
-          const text = e.target?.result as string;
+        reader.onload = async (e) => {
+          const arrayBuffer = e.target?.result as ArrayBuffer;
+          if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+             toast({
+                title: 'File not supported yet',
+                description: `DOCX file parsing is coming soon. Please use PDF or TXT.`,
+                variant: 'destructive',
+             });
+             return;
+          }
+          const text = new TextDecoder().decode(arrayBuffer);
           setResumeText(text);
           setFileName(file.name);
           toast({
@@ -41,11 +50,11 @@ export default function ResumeAnalyzerPage() {
             description: `${file.name} has been successfully read.`,
           });
         };
-        reader.readAsText(file);
+        reader.readAsArrayBuffer(file);
       } else {
         toast({
           title: 'Unsupported File Type',
-          description: 'Please upload a .pdf or .txt file.',
+          description: 'Please upload a .pdf, .docx, or .txt file.',
           variant: 'destructive',
         });
       }
@@ -86,7 +95,7 @@ export default function ResumeAnalyzerPage() {
         <h1 className="text-3xl font-bold tracking-tight">AI Resume Analyzer</h1>
       </div>
       <p className="text-muted-foreground">
-        Paste your resume, upload a file, and add an optional job description to get AI-powered feedback.
+        Get AI-powered feedback on your resume. For building a new one, head to the <Link href="/resume-builder" className="text-primary underline">Resume Builder</Link>.
       </p>
 
       {isPremiumFeature && (
@@ -117,14 +126,14 @@ export default function ResumeAnalyzerPage() {
                   {fileName ? (
                     <span className="flex items-center justify-center gap-2 font-semibold text-primary"><FileCheck2 className="h-4 w-4"/> {fileName}</span>
                   ) : (
-                    "Click to upload a .pdf or .txt file"
+                    "Click to upload a .pdf, .docx, or .txt file"
                   )}
                 </p>
                 <Input 
                   ref={fileInputRef}
                   type="file"
                   className="hidden"
-                  accept=".pdf,.txt"
+                  accept=".pdf,.txt,.docx"
                   onChange={handleFileChange}
                 />
               </div>
@@ -163,7 +172,7 @@ export default function ResumeAnalyzerPage() {
             ) : (
               isPremiumFeature ? <Lock className="mr-2 h-4 w-4" /> : <Wand2 className="mr-2 h-4 w-4" />
             )}
-            Analyze & Improve
+            Analyze Resume
           </Button>
         </div>
         
@@ -180,25 +189,39 @@ export default function ResumeAnalyzerPage() {
           {analysis && !isPremiumFeature && (
             <Card>
               <CardHeader>
-                <CardTitle>Analysis & Improved Version</CardTitle>
-                <CardDescription>Overall Score: {analysis.overallScore}/100</CardDescription>
+                <CardTitle>Analysis Report</CardTitle>
+                <CardDescription>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span>Overall Score: {analysis.overallScore}/100</span>
+                    <Progress value={analysis.overallScore} className="w-1/2" />
+                  </div>
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
+                <div className="flex gap-4">
+                    <ThumbsUp className="text-green-500 h-5 w-5 mt-1 shrink-0"/>
+                    <div>
+                        <h4 className="font-semibold">Strengths</h4>
+                        <p className="text-sm text-muted-foreground">{analysis.strengths}</p>
+                    </div>
+                </div>
+                <div className="flex gap-4">
+                    <ThumbsDown className="text-red-500 h-5 w-5 mt-1 shrink-0"/>
+                    <div>
+                        <h4 className="font-semibold">Areas for Improvement</h4>
+                        <p className="text-sm text-muted-foreground">{analysis.weaknesses}</p>
+                    </div>
+                </div>
                  <div>
-                    <h3 className="font-semibold mb-2">Feedback</h3>
-                    <p className="text-sm text-muted-foreground">{analysis.feedback}</p>
-                 </div>
-                 <div>
-                    <h3 className="font-semibold mb-2">Suggestions</h3>
-                    <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2"><ListChecks /> Actionable Suggestions</h3>
+                    <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
                         {analysis.suggestions.map((s,i) => <li key={i}>{s}</li>)}
                     </ul>
                  </div>
-                 <div>
-                    <h3 className="font-semibold mb-2">Improved Resume</h3>
-                    <div className="p-4 border rounded-md bg-muted/50 max-h-96 overflow-y-auto">
-                        <pre className="text-sm whitespace-pre-wrap font-body">{analysis.improvedVersion}</pre>
-                    </div>
+                 <div className="pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                        Want the AI to rewrite it for you? Check out the <Link href="/resume-builder" className="text-primary underline">Resume Builder</Link>.
+                    </p>
                  </div>
               </CardContent>
             </Card>

@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview An AI-powered resume analyzer and builder assistant.
+ * @fileOverview An AI-powered resume analyzer.
  *
  * - analyzeResume - A function that analyzes a resume and provides feedback.
  * - AnalyzeResumeInput - The input type for the analyzeResume function.
@@ -18,12 +18,12 @@ const AnalyzeResumeInputSchema = z.object({
 export type AnalyzeResumeInput = z.infer<typeof AnalyzeResumeInputSchema>;
 
 const AnalyzeResumeOutputSchema = z.object({
-  overallScore: z.number().describe('An overall score for the resume (0-100).'),
-  feedback: z.string().describe('A summary of the strengths and weaknesses of the resume.'),
+  overallScore: z.number().describe('An overall score for the resume (0-100), based on keyword alignment, clarity, and impact.'),
+  strengths: z.string().describe('A summary of the strengths of the resume.'),
+  weaknesses: z.string().describe('A summary of the weaknesses of the resume.'),
   suggestions: z
     .array(z.string())
     .describe('A list of specific, actionable suggestions for improving the resume.'),
-  improvedVersion: z.string().describe('An improved version of the resume text based on the suggestions.'),
 });
 export type AnalyzeResumeOutput = z.infer<typeof AnalyzeResumeOutputSchema>;
 
@@ -52,11 +52,10 @@ const resumeAnalysisPrompt = ai.definePrompt({
 
   Provide the following analysis:
   1.  An overall score (0-100) for the resume.
-  2.  Constructive feedback summarizing its strengths and weaknesses.
+  2.  A summary of its strengths and weaknesses.
   3.  A list of actionable suggestions for improvement.
-  4.  A rewritten, improved version of the resume text that incorporates your suggestions.
 
-  Focus on clarity, impact, use of action verbs, and keyword optimization.
+  Focus on clarity, impact, use of action verbs, and keyword optimization. Do not rewrite the resume.
   `,
 });
 

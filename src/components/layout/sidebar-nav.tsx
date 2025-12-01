@@ -14,6 +14,7 @@ import {
   Gem,
   Lock,
   Sparkles,
+  PenSquare,
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -23,7 +24,6 @@ import {
   SidebarGroupLabel,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 
 // MOCK: In a real app, this would come from user authentication
@@ -39,7 +39,8 @@ const primaryNav = [
 const secondaryNav = [
   { name: 'Interview History', href: '/history', icon: History, requiredPlan: 'Free' },
   { name: 'Question Bank', href: '/questions', icon: FileQuestion, requiredPlan: 'Free' },
-  { name: 'Resume AI', href: '/resume-analyzer', icon: FileText, requiredPlan: 'Premium' },
+  { name: 'Resume Analyzer', href: '/resume-analyzer', icon: FileText, requiredPlan: 'Premium' },
+  { name: 'Resume Builder', href: '/resume-builder', icon: PenSquare, requiredPlan: 'Premium' },
   { name: 'Confidence Coach', href: '/confidence-coach', icon: Sparkles, requiredPlan: 'Premium' },
 ];
 
