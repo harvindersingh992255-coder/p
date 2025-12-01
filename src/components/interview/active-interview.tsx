@@ -7,9 +7,11 @@ import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Mic, MicOff, Video, VideoOff, Square, Loader2, ArrowRight, SkipForward } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, Square, Loader2, ArrowRight, SkipForward, Type } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 
 const mockQuestions = [
     "Tell me about a time you faced a challenge at work.",
@@ -30,6 +32,7 @@ export function ActiveInterview() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(false);
+  const [textAnswer, setTextAnswer] = useState('');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -97,6 +100,8 @@ export function ActiveInterview() {
   
   const handleNextQuestion = () => {
     if(isListening) handleStopRecording();
+    // Here you would save the textAnswer
+    setTextAnswer('');
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
@@ -139,7 +144,54 @@ export function ActiveInterview() {
                     </div>
                 )}
             </div>
-            {isListening && <p className="text-sm text-muted-foreground italic text-center p-2 border rounded-md">{text || "Listening..."}</p>}
+            
+            <Tabs defaultValue="voice" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="voice" disabled={!hasRecognitionSupport}>
+                  <Mic className="mr-2 h-4 w-4" />
+                  Voice
+                </TabsTrigger>
+                <TabsTrigger value="text">
+                  <Type className="mr-2 h-4 w-4" />
+                  Text
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="voice">
+                <div className="flex flex-col items-center gap-4 py-4">
+                  <Button 
+                    onClick={isListening ? handleStopRecording : handleStartRecording} 
+                    disabled={!hasRecognitionSupport || !isCameraOn}
+                    size="lg"
+                    className="w-36"
+                  >
+                    {isListening ? (
+                      <>
+                        <MicOff className="mr-2 h-4 w-4 animate-pulse" />
+                        Stop
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="mr-2 h-4 w-4" />
+                        Answer
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-sm text-muted-foreground h-10 italic">
+                    {isListening ? text || "Listening..." : "Click 'Answer' to start recording"}
+                  </p>
+                </div>
+              </TabsContent>
+              <TabsContent value="text">
+                <div className="py-4">
+                  <Textarea 
+                    placeholder="Type your answer here..."
+                    className="min-h-[100px]"
+                    value={textAnswer}
+                    onChange={(e) => setTextAnswer(e.target.value)}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
         </CardContent>
         <CardFooter className="flex-col sm:flex-row justify-between items-center gap-4 p-4 border-t">
           <div className="flex gap-2">
@@ -170,30 +222,10 @@ export function ActiveInterview() {
                 Skip
             </Button>
           </div>
-          <div className="flex items-center gap-4">
-              <Button 
-                onClick={isListening ? handleStopRecording : handleStartRecording} 
-                disabled={!hasRecognitionSupport || !isCameraOn}
-                size="lg"
-                className="w-36"
-              >
-                {isListening ? (
-                  <>
-                    <MicOff className="mr-2 h-4 w-4 animate-pulse" />
-                    Stop
-                  </>
-                ) : (
-                  <>
-                    <Mic className="mr-2 h-4 w-4" />
-                    Answer
-                  </>
-                )}
-              </Button>
-              <Button size="lg" onClick={handleNextQuestion}>
-                Next Question
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-          </div>
+          <Button size="lg" onClick={handleNextQuestion}>
+            Next Question
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </CardFooter>
       </Card>
     </div>
