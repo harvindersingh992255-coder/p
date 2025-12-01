@@ -10,11 +10,9 @@ import {
   User,
   History,
   FileQuestion,
-  Settings,
-  HelpCircle,
-  MessageSquare,
   FileText,
   Gem,
+  Lock,
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -24,6 +22,11 @@ import {
   SidebarGroupLabel,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
+import { Badge } from '../ui/badge';
+import { cn } from '@/lib/utils';
+
+// MOCK: In a real app, this would come from user authentication
+const userPlan = 'Free'; // 'Free', 'Premium', or 'Super'
 
 const primaryNav = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -33,13 +36,20 @@ const primaryNav = [
 ];
 
 const secondaryNav = [
-  { name: 'Interview History', href: '/history', icon: History },
-  { name: 'Question Bank', href: '/questions', icon: FileQuestion },
-  { name: 'Resume AI', href: '/resume-analyzer', icon: FileText },
+  { name: 'Interview History', href: '/history', icon: History, requiredPlan: 'Free' },
+  { name: 'Question Bank', href: '/questions', icon: FileQuestion, requiredPlan: 'Free' },
+  { name: 'Resume AI', href: '/resume-analyzer', icon: FileText, requiredPlan: 'Premium' },
 ];
 
 export function SidebarNav() {
   const pathname = usePathname();
+
+  const isPlanSufficient = (requiredPlan: string) => {
+    if (requiredPlan === 'Free') return true;
+    if (requiredPlan === 'Premium' && (userPlan === 'Premium' || userPlan === 'Super')) return true;
+    if (requiredPlan === 'Super' && userPlan === 'Super') return true;
+    return false;
+  };
 
   const isActive = (href: string) => {
     // Make dashboard active for root path as well
@@ -68,16 +78,26 @@ export function SidebarNav() {
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarMenu>
-            {secondaryNav.map((item) => (
-              <SidebarMenuItem key={item.name}>
-                <Link href={item.href} passHref>
-                  <SidebarMenuButton as="a" isActive={isActive(item.href)} tooltip={item.name}>
-                    <item.icon />
-                    <span>{item.name}</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
+            {secondaryNav.map((item) => {
+              const hasAccess = isPlanSufficient(item.requiredPlan);
+              return (
+                <SidebarMenuItem key={item.name}>
+                  <Link href={hasAccess ? item.href : '/pricing'} passHref>
+                    <SidebarMenuButton 
+                      as="a" 
+                      isActive={hasAccess && isActive(item.href)} 
+                      tooltip={item.name}
+                      disabled={!hasAccess}
+                      className={cn(!hasAccess && "text-muted-foreground/70 hover:text-muted-foreground")}
+                    >
+                      <item.icon />
+                      <span>{item.name}</span>
+                       {!hasAccess && <Lock className="ml-auto h-3 w-3" />}
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              )
+            })}
           </SidebarMenu>
         </SidebarGroup>
       </div>
