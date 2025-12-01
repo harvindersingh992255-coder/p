@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { BarChart, MessageCircle, Play, Smile, ThumbsDown, ThumbsUp, BrainCircuit } from 'lucide-react';
+import { BarChart, MessageCircle, Play, Smile, ThumbsDown, ThumbsUp, BrainCircuit, Lock } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import {
   ChartContainer,
@@ -21,7 +21,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import Link from 'next/link';
 
+// MOCK: In a real app, this would come from user authentication
+const userPlan = 'Free'; // 'Free', 'Premium', or 'Super'
 
 const mockFeedback = {
   overallScore: 82,
@@ -60,15 +64,13 @@ export function InterviewResults() {
   const [feedback, setFeedback] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const isPremiumFeature = userPlan === 'Free';
+
   useEffect(() => {
     const getFeedback = async () => {
       setIsLoading(true);
       // In a real app, you would fetch real interview data and call the AI flows.
       // For this demo, we'll simulate that with mock data and a delay.
-      //
-      // Example of how you might call the flows:
-      // const textResponse = await analyzeInterviewResponse({ ... });
-      // const videoResponse = await bodyLanguageAnalysis({ ... });
       
       setTimeout(() => {
         setFeedback(mockFeedback);
@@ -119,16 +121,29 @@ export function InterviewResults() {
           </div>
           <div className="md:col-span-2">
             <h3 className="font-semibold mb-4">Performance Breakdown</h3>
-            <ChartContainer config={chartConfig} className="h-[250px] w-full">
-              <ResponsiveContainer>
-                <RechartsBarChart layout="vertical" data={feedback.breakdown} margin={{left:20}}>
-                  <XAxis type="number" domain={[0, 100]} hide />
-                  <YAxis dataKey="category" type="category" tickLine={false} axisLine={false} tickMargin={10} width={100} />
-                  <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                  <Bar dataKey="score" layout="vertical" radius={5} fill="var(--color-score)" barSize={20} />
-                </RechartsBarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+             {isPremiumFeature ? (
+                <div className="h-[250px] w-full flex items-center justify-center rounded-lg bg-muted/50 p-4">
+                  <div className="text-center">
+                    <Lock className="mx-auto h-8 w-8 text-muted-foreground" />
+                    <p className="mt-2 font-semibold">Advanced Analytics Locked</p>
+                    <p className="text-sm text-muted-foreground">Upgrade to Premium to see a detailed performance breakdown.</p>
+                     <Button asChild size="sm" className="mt-4">
+                        <Link href="/pricing">Upgrade Plan</Link>
+                    </Button>
+                  </div>
+                </div>
+            ) : (
+                <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                <ResponsiveContainer>
+                    <RechartsBarChart layout="vertical" data={feedback.breakdown} margin={{left:20}}>
+                    <XAxis type="number" domain={[0, 100]} hide />
+                    <YAxis dataKey="category" type="category" tickLine={false} axisLine={false} tickMargin={10} width={100} />
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                    <Bar dataKey="score" layout="vertical" radius={5} fill="var(--color-score)" barSize={20} />
+                    </RechartsBarChart>
+                </ResponsiveContainer>
+                </ChartContainer>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -174,11 +189,21 @@ export function InterviewResults() {
                             </div>
                         </CardContent>
                     </Card>
-                     <Card className="bg-muted/30">
+                     <Card className="bg-muted/30 relative overflow-hidden">
                         <CardHeader>
                           <CardTitle className="text-lg">Delivery Analysis</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            {isPremiumFeature && (
+                                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-4 z-10">
+                                    <Lock className="h-8 w-8 text-muted-foreground" />
+                                    <p className="mt-2 font-semibold">Unlock Body Language Analysis</p>
+                                    <p className="text-sm text-muted-foreground">Upgrade to Premium for feedback on posture, eye contact, and more.</p>
+                                    <Button asChild size="sm" className="mt-4">
+                                        <Link href="/pricing">Upgrade Plan</Link>
+                                    </Button>
+                                </div>
+                            )}
                             {item.bodyLanguageFeedback && <div className="flex gap-4">
                                 <Smile className="text-yellow-500 h-5 w-5 mt-1 shrink-0"/>
                                 <div>

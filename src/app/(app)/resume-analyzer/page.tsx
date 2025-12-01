@@ -6,9 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Loader2, Wand2, UploadCloud, FileCheck2 } from 'lucide-react';
+import { FileText, Loader2, Wand2, UploadCloud, FileCheck2, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import Link from 'next/link';
+
+// MOCK: In a real app, this would come from user authentication
+const userPlan = 'Free'; // 'Free', 'Premium', or 'Super'
 
 export default function ResumeAnalyzerPage() {
   const [resumeText, setResumeText] = useState('');
@@ -19,7 +24,10 @@ export default function ResumeAnalyzerPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  const isPremiumFeature = userPlan === 'Free';
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (isPremiumFeature) return;
     const file = event.target.files?.[0];
     if (file) {
       if (file.type === 'application/pdf' || file.type === 'text/plain') {
@@ -45,6 +53,7 @@ export default function ResumeAnalyzerPage() {
   };
 
   const handleAnalyze = async () => {
+    if (isPremiumFeature) return;
     if (!resumeText.trim()) {
       toast({
         title: 'Error',
@@ -56,8 +65,6 @@ export default function ResumeAnalyzerPage() {
     setIsLoading(true);
     setAnalysis(null);
     try {
-      // In a real app, you'd parse PDF/DOCX server-side for better results.
-      // Here we assume plain text extraction is sufficient.
       const result = await analyzeResume({ resumeText, jobDescription });
       setAnalysis(result);
     } catch (error) {
@@ -82,8 +89,19 @@ export default function ResumeAnalyzerPage() {
         Paste your resume, upload a file, and add an optional job description to get AI-powered feedback.
       </p>
 
+      {isPremiumFeature && (
+        <Alert>
+          <Lock className="h-4 w-4" />
+          <AlertTitle>Premium Feature</AlertTitle>
+          <AlertDescription>
+            The AI Resume Analyzer is a premium feature. 
+            <Link href="/pricing" className="font-bold text-primary hover:underline ml-1">Upgrade your plan</Link> to get access.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div className="space-y-4">
+        <div className={`space-y-4 ${isPremiumFeature ? 'opacity-50 pointer-events-none' : ''}`}>
           <Card>
             <CardHeader>
               <CardTitle>Your Resume</CardTitle>
@@ -139,18 +157,18 @@ export default function ResumeAnalyzerPage() {
               />
             </CardContent>
           </Card>
-          <Button onClick={handleAnalyze} disabled={isLoading} size="lg" className="w-full">
+          <Button onClick={handleAnalyze} disabled={isLoading || isPremiumFeature} size="lg" className="w-full">
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Wand2 className="mr-2 h-4 w-4" />
+              isPremiumFeature ? <Lock className="mr-2 h-4 w-4" /> : <Wand2 className="mr-2 h-4 w-4" />
             )}
             Analyze & Improve
           </Button>
         </div>
         
         <div className="space-y-4">
-          {isLoading && (
+          {isLoading && !isPremiumFeature && (
             <Card className="flex h-full min-h-[300px] items-center justify-center">
               <CardContent className="text-center">
                 <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
@@ -159,7 +177,7 @@ export default function ResumeAnalyzerPage() {
             </Card>
           )}
 
-          {analysis && (
+          {analysis && !isPremiumFeature && (
             <Card>
               <CardHeader>
                 <CardTitle>Analysis & Improved Version</CardTitle>
@@ -186,11 +204,13 @@ export default function ResumeAnalyzerPage() {
             </Card>
           )}
 
-          {!isLoading && !analysis && (
+          {(!isLoading && !analysis || isPremiumFeature) && (
              <Card className="flex h-full min-h-[300px] items-center justify-center">
               <CardContent className="text-center">
                 <Wand2 className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <p className="mt-4 text-muted-foreground">Your analysis will appear here.</p>
+                <p className="mt-4 text-muted-foreground">
+                  {isPremiumFeature ? 'Upgrade to Premium to see your analysis' : 'Your analysis will appear here.'}
+                </p>
               </CardContent>
             </Card>
           )}
