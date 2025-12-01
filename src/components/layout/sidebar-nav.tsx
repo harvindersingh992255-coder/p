@@ -13,6 +13,8 @@ import {
   Settings,
   HelpCircle,
   MessageSquare,
+  FileText,
+  Gem,
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -33,6 +35,7 @@ const primaryNav = [
 const secondaryNav = [
   { name: 'Interview History', href: '/history', icon: History },
   { name: 'Question Bank', href: '/questions', icon: FileQuestion },
+  { name: 'Resume AI', href: '/resume-analyzer', icon: FileText },
 ];
 
 export function SidebarNav() {
@@ -80,6 +83,14 @@ export function SidebarNav() {
       </div>
       <div>
         <SidebarMenu>
+           <SidebarMenuItem>
+            <Link href="/pricing" passHref>
+              <SidebarMenuButton as="a" isActive={isActive('/pricing')} tooltip="Pricing">
+                <Gem />
+                <span>Pricing</span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <Link href="/profile" passHref>
               <SidebarMenuButton as="a" isActive={isActive('/profile')} tooltip="Profile">
