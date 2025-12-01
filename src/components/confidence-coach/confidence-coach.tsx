@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, Loader2, Sparkles, Zap } from 'lucide-react';
+import { Heart, Loader2, Sparkles, Zap, Lock } from 'lucide-react';
 import { generatePepTalk } from '@/ai/flows/confidence-coach';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -61,11 +61,11 @@ export function ConfidenceCoach() {
       
        {isPremiumFeature && (
         <Alert>
-          <Sparkles className="h-4 w-4" />
+          <Lock className="h-4 w-4" />
           <AlertTitle>Premium Feature</AlertTitle>
           <AlertDescription>
             The AI Confidence Coach is a premium feature. 
-            <Link href="/pricing" className="font-bold text-primary hover:underline ml-1">Upgrade your plan</Link> to unlock your inner confidence.
+            <Button variant="link" asChild className="p-0 h-auto ml-1"><Link href="/pricing" className="font-bold text-primary hover:underline">Upgrade your plan</Link></Button> to unlock your inner confidence.
           </AlertDescription>
         </Alert>
       )}

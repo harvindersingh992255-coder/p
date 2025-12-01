@@ -95,7 +95,7 @@ export default function ResumeAnalyzerPage() {
           <AlertTitle>Premium Feature</AlertTitle>
           <AlertDescription>
             The AI Resume Analyzer is a premium feature. 
-            <Link href="/pricing" className="font-bold text-primary hover:underline ml-1">Upgrade your plan</Link> to get access.
+            <Button variant="link" asChild className="p-0 h-auto ml-1"><Link href="/pricing" className="font-bold text-primary hover:underline">Upgrade your plan</Link></Button> to get access.
           </AlertDescription>
         </Alert>
       )}
@@ -207,10 +207,20 @@ export default function ResumeAnalyzerPage() {
           {(!isLoading && !analysis || isPremiumFeature) && (
              <Card className="flex h-full min-h-[300px] items-center justify-center">
               <CardContent className="text-center">
-                <Wand2 className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <p className="mt-4 text-muted-foreground">
-                  {isPremiumFeature ? 'Upgrade to Premium to see your analysis' : 'Your analysis will appear here.'}
-                </p>
+                 {isPremiumFeature ? (
+                  <>
+                    <Lock className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                    <p className="mt-4 text-muted-foreground">Upgrade to Premium to see your analysis.</p>
+                    <Button asChild className="mt-4">
+                      <Link href="/pricing">Upgrade</Link>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                    <p className="mt-4 text-muted-foreground">Your analysis will appear here.</p>
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
