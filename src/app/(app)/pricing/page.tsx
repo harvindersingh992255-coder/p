@@ -5,7 +5,7 @@ import { Check } from 'lucide-react';
 const plans = [
   {
     name: 'Free',
-    price: '$0',
+    price: '₹0',
     pricePeriod: '/ month',
     description: 'Get started with the basics. Perfect for occasional practice.',
     features: [
@@ -18,7 +18,7 @@ const plans = [
   },
   {
     name: 'Premium',
-    price: '$149',
+    price: '₹149',
     pricePeriod: '/ year',
     description: 'Unlock your full potential with advanced features and unlimited practice.',
     features: [
@@ -33,7 +33,7 @@ const plans = [
   },
   {
     name: 'Super',
-    price: '$249',
+    price: '₹249',
     pricePeriod: '/ year',
     description: 'For professionals who want personalized coaching and every advantage.',
     features: [
