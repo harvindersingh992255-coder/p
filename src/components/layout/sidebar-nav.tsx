@@ -13,6 +13,7 @@ import {
   FileText,
   Gem,
   Lock,
+  Sparkles,
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -39,6 +40,7 @@ const secondaryNav = [
   { name: 'Interview History', href: '/history', icon: History, requiredPlan: 'Free' },
   { name: 'Question Bank', href: '/questions', icon: FileQuestion, requiredPlan: 'Free' },
   { name: 'Resume AI', href: '/resume-analyzer', icon: FileText, requiredPlan: 'Premium' },
+  { name: 'Confidence Coach', href: '/confidence-coach', icon: Sparkles, requiredPlan: 'Premium' },
 ];
 
 export function SidebarNav() {
