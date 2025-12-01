@@ -29,10 +29,6 @@ const AnalyzeInterviewResponseOutputSchema = z.object({
   improvementSuggestions: z
     .string()
     .describe('Specific, actionable suggestions for improving the response.'),
-  bodyLanguageFeedback: z
-    .string()
-    .optional()
-    .describe('Optional feedback on the candidate\'s body language, if available.'),
 });
 
 export type AnalyzeInterviewResponseOutput = z.infer<
@@ -63,7 +59,7 @@ const analyzeInterviewResponsePrompt = ai.definePrompt({
   3.  A summary of the candidate's weaknesses.
   4.  Specific, actionable suggestions for improving the response.
 
-  {% if transcript %} Full Interview Transcript: {{{transcript}}} {% endif %}
+  {{#if transcript}} Full Interview Transcript: {{{transcript}}} {{/if}}
 
   Focus on content, clarity, and relevance to the job role and industry.  If the full interview transcript is provided, also incorporate how this response fits into the larger interview context.
 
