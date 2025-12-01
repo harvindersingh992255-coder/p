@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import type { InterviewQuestion } from '@/lib/types';
 
 const mockQuestions = [
     "Tell me about a time you faced a challenge at work.",
@@ -26,7 +27,7 @@ export function ActiveInterview() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const { text, startListening, stopListening, isListening, hasRecognitionSupport } = useSpeechRecognition();
+  const { text, startListening, stopListening, isListening, hasRecognitionSupport, setText } = useSpeechRecognition();
   
   const [questions, setQuestions] = useState<string[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -37,15 +38,18 @@ export function ActiveInterview() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
+  const [answers, setAnswers] = useState<InterviewQuestion[]>([]);
+
 
   useEffect(() => {
     const fetchQuestions = async () => {
       const jobRole = searchParams.get('jobRole') || 'Software Engineer';
       const industry = searchParams.get('industry') || 'Technology';
+      const interviewLength = parseInt(searchParams.get('interviewLength') || '5', 10);
       try {
-        // const result = await generateInterviewQuestions({ jobRole, industry, numQuestions: 5 });
+        // const result = await generateInterviewQuestions({ jobRole, industry, numQuestions: interviewLength });
         // setQuestions(result.questions);
-        setQuestions(mockQuestions); // Using mock questions for now
+        setQuestions(mockQuestions.slice(0, interviewLength)); // Using mock questions for now
       } catch (error) {
         console.error("Failed to generate questions:", error);
         toast({ title: "Error", description: "Could not fetch interview questions. Using defaults.", variant: "destructive" });
@@ -68,14 +72,6 @@ export function ActiveInterview() {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         videoRef.current!.srcObject = stream;
         setIsCameraOn(true);
-        recordedChunksRef.current = [];
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                recordedChunksRef.current.push(event.data);
-            }
-        };
       } catch (error) {
         console.error("Error accessing camera:", error);
         toast({ title: "Camera Error", description: "Could not access your camera.", variant: "destructive" });
@@ -84,7 +80,24 @@ export function ActiveInterview() {
   };
   
   const handleStartRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'inactive') {
+    const stream = videoRef.current?.srcObject as MediaStream;
+    if (stream) {
+        recordedChunksRef.current = [];
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                recordedChunksRef.current.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+          const videoUrl = URL.createObjectURL(blob);
+          saveAnswer(text, videoUrl);
+        };
+
         mediaRecorderRef.current.start();
     }
     startListening();
@@ -95,18 +108,50 @@ export function ActiveInterview() {
         mediaRecorderRef.current.stop();
     }
     stopListening();
-    // Here you would save the text and the recordedChunksRef.current
   };
+
+  const saveAnswer = (userAnswer: string, videoUrl?: string) => {
+     setAnswers(prev => [
+        ...prev,
+        {
+          id: `q-${currentQuestionIndex}`,
+          question: questions[currentQuestionIndex],
+          userAnswer: userAnswer,
+          videoUrl: videoUrl,
+        }
+      ]);
+  }
   
+  const finishInterview = () => {
+    // In a real app, you'd save this to a database
+    const sessionData = {
+      id: `sess_${Date.now()}`,
+      date: new Date().toISOString(),
+      jobRole: searchParams.get('jobRole') || 'Software Engineer',
+      industry: searchParams.get('industry') || 'Technology',
+      overallScore: 0, // This would be calculated later
+      questions: answers,
+    };
+    localStorage.setItem('latestInterviewSession', JSON.stringify(sessionData));
+    router.push(`/interview/results/${sessionData.id}`);
+  }
+
   const handleNextQuestion = () => {
-    if(isListening) handleStopRecording();
-    // Here you would save the textAnswer
+    if (isListening) {
+      handleStopRecording();
+    } else if (textAnswer) {
+      saveAnswer(textAnswer);
+    } else {
+      saveAnswer(''); // Save an empty answer if nothing was said or typed
+    }
+    
+    setText('');
     setTextAnswer('');
+
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // End of interview
-      router.push('/interview/results/some-session-id');
+      finishInterview();
     }
   };
 
@@ -177,7 +222,7 @@ export function ActiveInterview() {
                     )}
                   </Button>
                   <p className="text-sm text-muted-foreground h-10 italic">
-                    {isListening ? text || "Listening..." : "Click 'Answer' to start recording"}
+                    {text ? text : (isListening ? "Listening..." : "Click 'Answer' to start recording")}
                   </p>
                 </div>
               </TabsContent>
@@ -211,7 +256,7 @@ export function ActiveInterview() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => router.push('/interview/results/some-session-id')}>
+                    <AlertDialogAction onClick={finishInterview}>
                         End Interview
                     </AlertDialogAction>
                     </AlertDialogFooter>
@@ -223,7 +268,7 @@ export function ActiveInterview() {
             </Button>
           </div>
           <Button size="lg" onClick={handleNextQuestion}>
-            Next Question
+            {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish & View Results'}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </CardFooter>

@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { analyzeInterviewResponse } from '@/ai/flows/ai-performance-feedback';
 import { bodyLanguageAnalysis } from '@/ai/flows/body-language-analysis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { BarChart, MessageCircle, Play, Smile, ThumbsDown, ThumbsUp, BrainCircuit, Lock } from 'lucide-react';
+import { BarChart, MessageCircle, Play, Smile, ThumbsDown, ThumbsUp, BrainCircuit, Lock, AlertCircle } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import {
   ChartContainer,
@@ -23,6 +23,8 @@ import {
 } from "recharts"
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import Link from 'next/link';
+import type { InterviewSession } from '@/lib/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 
 // MOCK: In a real app, this would come from user authentication
 const userPlan = 'Free'; // 'Free', 'Premium', or 'Super'
@@ -39,6 +41,7 @@ const mockFeedback = {
   questions: [
     {
       question: "Tell me about a time you faced a challenge at work.",
+      userAnswer: "There was a time when a critical bug appeared in production right before a major release. I had to coordinate with my team to quickly identify the root cause, develop a hotfix, and deploy it without impacting the release deadline. We managed to resolve it with only a 30-minute delay.",
       feedback: {
         score: 80,
         strengths: "Good use of a specific example. You clearly outlined the situation.",
@@ -49,6 +52,7 @@ const mockFeedback = {
     },
     {
       question: "What are your biggest strengths and weaknesses?",
+      userAnswer: "My greatest strength is my ability to learn quickly and adapt to new technologies. As for weaknesses, I sometimes get too focused on minor details, but I'm learning to prioritize better.",
       feedback: {
         score: 85,
         strengths: "You provided a confident and well-reasoned answer for your strengths, linking them to the job role.",
@@ -56,11 +60,18 @@ const mockFeedback = {
         improvementSuggestions: "Choose a real weakness and show how you are actively working to improve it. This demonstrates self-awareness."
       },
       bodyLanguageFeedback: "Your posture was upright and open, which conveyed confidence. Well done."
+    },
+    {
+        question: "Where do you see yourself in 5 years?",
+        userAnswer: "",
+        feedback: null,
+        bodyLanguageFeedback: null,
     }
   ]
 };
 
 export function InterviewResults() {
+  const [session, setSession] = useState<InterviewSession | null>(null);
   const [feedback, setFeedback] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -69,11 +80,40 @@ export function InterviewResults() {
   useEffect(() => {
     const getFeedback = async () => {
       setIsLoading(true);
-      // In a real app, you would fetch real interview data and call the AI flows.
-      // For this demo, we'll simulate that with mock data and a delay.
+      const sessionDataString = localStorage.getItem('latestInterviewSession');
+      
+      if (sessionDataString) {
+        const sessionData: InterviewSession = JSON.parse(sessionDataString);
+        setSession(sessionData);
+
+        // In a real app, you'd call AI flows for each question
+        // For this demo, we'll simulate it with mock data
+        const processedQuestions = sessionData.questions.map((q, i) => {
+            if (!q.userAnswer) {
+                return { ...q, feedback: null, bodyLanguageFeedback: null };
+            }
+            // Use mock feedback for answered questions
+            return {
+                ...q,
+                ...mockFeedback.questions[i % 2], // Cycle through mock feedbacks
+                question: q.question, // Keep original question
+                userAnswer: q.userAnswer,
+            };
+        });
+        
+        const finalFeedback = {
+            ...mockFeedback,
+            questions: processedQuestions,
+        };
+
+        setFeedback(finalFeedback);
+
+      } else {
+        // Fallback to mock if nothing in local storage
+        setFeedback(mockFeedback);
+      }
       
       setTimeout(() => {
-        setFeedback(mockFeedback);
         setIsLoading(false);
       }, 2000);
     };
@@ -155,78 +195,111 @@ export function InterviewResults() {
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="w-full">
-            {feedback.questions.map((item: any, index: number) => (
+            {(session?.questions || feedback.questions).map((item: any, index: number) => (
               <AccordionItem value={`item-${index}`} key={index}>
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex justify-between items-center w-full pr-4">
                     <span className="text-left font-medium">Question {index + 1}: <span className="text-muted-foreground font-normal italic">"{item.question.substring(0,50)}..."</span></span>
-                    <Badge variant={item.feedback.score > 80 ? "default" : "secondary"} className={`${item.feedback.score > 80 ? 'bg-primary/20 text-primary' : 'bg-secondary/50 text-secondary-foreground'} border-none`}>
-                        Score: {item.feedback.score}%
-                    </Badge>
+                    {item.feedback ? (
+                        <Badge variant={item.feedback.score > 80 ? "default" : "secondary"} className={`${item.feedback.score > 80 ? 'bg-primary/20 text-primary' : 'bg-secondary/50 text-secondary-foreground'} border-none`}>
+                            Score: {item.feedback.score}%
+                        </Badge>
+                    ) : (
+                        <Badge variant="destructive">Not Answered</Badge>
+                    )}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-6 pt-4">
                   <blockquote className="border-l-2 pl-6 italic text-muted-foreground">"{item.question}"</blockquote>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <Card className="bg-muted/30">
-                        <CardHeader>
-                          <CardTitle className="text-lg">Content Analysis</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex gap-4">
-                                <ThumbsUp className="text-green-500 h-5 w-5 mt-1 shrink-0"/>
-                                <div>
-                                    <h4 className="font-semibold">Strengths</h4>
-                                    <p className="text-sm text-muted-foreground">{item.feedback.strengths}</p>
+                  
+                  {!item.feedback ? (
+                      <div className="text-center py-8 bg-muted/30 rounded-lg">
+                          <AlertCircle className="mx-auto h-8 w-8 text-muted-foreground" />
+                          <p className="mt-2 text-muted-foreground">You did not provide an answer for this question.</p>
+                      </div>
+                  ) : (
+                    <>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <Card className="bg-muted/30">
+                            <CardHeader>
+                              <CardTitle className="text-lg">Content Analysis</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex gap-4">
+                                    <ThumbsUp className="text-green-500 h-5 w-5 mt-1 shrink-0"/>
+                                    <div>
+                                        <h4 className="font-semibold">Strengths</h4>
+                                        <p className="text-sm text-muted-foreground">{item.feedback.strengths}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex gap-4">
-                                <ThumbsDown className="text-red-500 h-5 w-5 mt-1 shrink-0"/>
-                                <div>
-                                    <h4 className="font-semibold">Areas for Improvement</h4>
-                                    <p className="text-sm text-muted-foreground">{item.feedback.weaknesses}</p>
+                                <div className="flex gap-4">
+                                    <ThumbsDown className="text-red-500 h-5 w-5 mt-1 shrink-0"/>
+                                    <div>
+                                        <h4 className="font-semibold">Areas for Improvement</h4>
+                                        <p className="text-sm text-muted-foreground">{item.feedback.weaknesses}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                     <Card className="bg-muted/30 relative overflow-hidden">
-                        <CardHeader>
-                          <CardTitle className="text-lg">Delivery Analysis</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {isPremiumFeature && (
-                                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-4 z-10">
-                                    <Lock className="h-8 w-8 text-muted-foreground" />
-                                    <p className="mt-2 font-semibold">Unlock Body Language Analysis</p>
-                                    <p className="text-sm text-muted-foreground">Upgrade to Premium for feedback on posture, eye contact, and more.</p>
-                                    <Button asChild size="sm" className="mt-4">
-                                        <Link href="/pricing">Upgrade Plan</Link>
-                                    </Button>
+                            </CardContent>
+                        </Card>
+                         <Card className="bg-muted/30 relative overflow-hidden">
+                            <CardHeader>
+                              <CardTitle className="text-lg">Delivery Analysis</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {isPremiumFeature && (
+                                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-4 z-10">
+                                        <Lock className="h-8 w-8 text-muted-foreground" />
+                                        <p className="mt-2 font-semibold">Unlock Body Language Analysis</p>
+                                        <p className="text-sm text-muted-foreground">Upgrade to Premium for feedback on posture, eye contact, and more.</p>
+                                        <Button asChild size="sm" className="mt-4">
+                                            <Link href="/pricing">Upgrade Plan</Link>
+                                        </Button>
+                                    </div>
+                                )}
+                                {item.bodyLanguageFeedback && <div className="flex gap-4">
+                                    <Smile className="text-yellow-500 h-5 w-5 mt-1 shrink-0"/>
+                                    <div>
+                                        <h4 className="font-semibold">Body Language</h4>
+                                        <p className="text-sm text-muted-foreground">{item.bodyLanguageFeedback}</p>
+                                    </div>
+                                </div>}
+                                 <div className="flex gap-4">
+                                    <MessageCircle className="text-blue-500 h-5 w-5 mt-1 shrink-0"/>
+                                    <div>
+                                        <h4 className="font-semibold">AI Suggestion</h4>
+                                        <p className="text-sm text-muted-foreground">{item.feedback.improvementSuggestions}</p>
+                                    </div>
                                 </div>
-                            )}
-                            {item.bodyLanguageFeedback && <div className="flex gap-4">
-                                <Smile className="text-yellow-500 h-5 w-5 mt-1 shrink-0"/>
-                                <div>
-                                    <h4 className="font-semibold">Body Language</h4>
-                                    <p className="text-sm text-muted-foreground">{item.bodyLanguageFeedback}</p>
+                            </CardContent>
+                        </Card>
+                      </div>
+                      
+                      {item.videoUrl && (
+                        <div className="pt-4">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline">
+                                <Play className="mr-2 h-4 w-4" />
+                                Playback Your Answer
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                    <DialogTitle>Your Answer Playback</DialogTitle>
+                                </DialogHeader>
+                                <div className="mt-4">
+                                    <video src={item.videoUrl} controls className="w-full rounded-lg" />
+                                    <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                                        <h4 className="font-semibold mb-2">Your transcribed answer:</h4>
+                                        <p className="text-sm text-muted-foreground italic">"{item.userAnswer}"</p>
+                                    </div>
                                 </div>
-                            </div>}
-                             <div className="flex gap-4">
-                                <MessageCircle className="text-blue-500 h-5 w-5 mt-1 shrink-0"/>
-                                <div>
-                                    <h4 className="font-semibold">AI Suggestion</h4>
-                                    <p className="text-sm text-muted-foreground">{item.feedback.improvementSuggestions}</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                  </div>
-                  <div className="pt-4">
-                    <Button variant="outline">
-                      <Play className="mr-2 h-4 w-4" />
-                      Playback Your Answer
-                    </Button>
-                  </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             ))}

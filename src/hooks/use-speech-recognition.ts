@@ -8,6 +8,7 @@ type SpeechRecognitionHook = {
   startListening: () => void;
   stopListening: () => void;
   hasRecognitionSupport: boolean;
+  setText: (text: string) => void;
 };
 
 export const useSpeechRecognition = (): SpeechRecognitionHook => {
@@ -49,11 +50,12 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
     };
     
     recognition.onend = () => {
-        if(isListening) {
-           // recognition.start(); // This can cause infinite loops if not handled carefully
-        } else {
-           recognition.stop();
-        }
+       if (recognitionRef.current) {
+         // if it's still supposed to be listening, restart it.
+         if (isListening) {
+           recognitionRef.current.start();
+         }
+       }
     };
 
     recognitionRef.current = recognition;
@@ -87,5 +89,6 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
       typeof window !== 'undefined' &&
       (window.SpeechRecognition || window.webkitSpeechRecognition)
     ),
+    setText,
   };
 };
