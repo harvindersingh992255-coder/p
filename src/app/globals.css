@@ -8,31 +8,31 @@ body {
 
 @layer base {
   :root {
-    --background: 224 71% 4%; /* Deep space blue */
+    --background: 222 89% 5%; /* Deep futuristic blue-black */
     --foreground: 210 40% 98%;
-    --card: 224 71% 9%; /* Slightly lighter space blue for cards */
+    --card: 222 47% 11%; /* Darker card background */
     --card-foreground: 210 40% 98%;
-    --popover: 224 71% 9%;
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
-    --primary: 262.1 83.3% 57.8%; /* Vibrant violet */
+    --primary: 217 91% 60%; /* Electric blue */
     --primary-foreground: 210 40% 98%;
-    --secondary: 217 33% 17%;
+    --secondary: 215 28% 17%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
+    --muted: 215 28% 17%;
     --muted-foreground: 215 20% 65%;
-    --accent: 262.1 83.3% 57.8%;
+    --accent: 180 90% 45%; /* Vibrant cyan for accents */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 25%; /* Brighter border for better contrast */
+    --border: 217 33% 17%;
     --input: 217 33% 17%;
-    --ring: 262.1 83.3% 57.8%;
+    --ring: 217 91% 60%;
     --chart-1: 217 91% 55%;
     --chart-2: 173 91% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 224 71% 6%; /* Consistent sidebar bg */
+    --sidebar-background: 222 89% 4%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 224 71% 4%;
@@ -43,31 +43,31 @@ body {
   }
 
   .dark {
-    --background: 224 71% 4%; /* Deep space blue */
+    --background: 222 89% 5%; /* Deep futuristic blue-black */
     --foreground: 210 40% 98%;
-    --card: 224 71% 9%; /* Slightly lighter space blue for cards */
+    --card: 222 47% 11%; /* Darker card background */
     --card-foreground: 210 40% 98%;
-    --popover: 224 71% 9%;
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
-    --primary: 262.1 83.3% 57.8%; /* Vibrant violet */
+    --primary: 217 91% 60%; /* Electric blue */
     --primary-foreground: 210 40% 98%;
-    --secondary: 217 33% 17%;
+    --secondary: 215 28% 17%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
+    --muted: 215 28% 17%;
     --muted-foreground: 215 20% 65%;
-    --accent: 262.1 83.3% 57.8%;
+    --accent: 180 90% 45%; /* Vibrant cyan for accents */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 25%; /* Brighter border for better contrast */
+    --border: 217 33% 17%;
     --input: 217 33% 17%;
-    --ring: 262.1 83.3% 57.8%;
+    --ring: 217 91% 60%;
     --chart-1: 217 91% 55%;
     --chart-2: 173 91% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 224 71% 6%; /* Consistent sidebar bg */
+    --sidebar-background: 222 89% 4%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 224 71% 4%;
