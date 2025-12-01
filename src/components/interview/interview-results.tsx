@@ -24,9 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import Link from 'next/link';
 import type { InterviewSession } from '@/lib/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
-
-// MOCK: In a real app, this would come from user authentication
-const userPlan = 'Free'; // 'Free', 'Premium', or 'Super'
+import { usePlan } from '@/hooks/use-plan';
 
 const mockFeedback = {
   overallScore: 82,
@@ -70,11 +68,12 @@ const mockFeedback = {
 };
 
 export function InterviewResults() {
+  const { isPlanSufficient } = usePlan();
   const [session, setSession] = useState<InterviewSession | null>(null);
   const [feedback, setFeedback] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isPremiumFeature = userPlan === 'Free';
+  const hasPremiumAccess = isPlanSufficient('Premium');
 
   useEffect(() => {
     const getFeedback = async () => {
@@ -105,7 +104,7 @@ export function InterviewResults() {
 
           // Calculate average score from answered questions
           const totalScore = processedQuestions.reduce((sum, q) => sum + (q.feedback?.score || 0), 0);
-          const overallScore = Math.round(totalScore / answeredQuestions.length);
+          const overallScore = answeredQuestions.length > 0 ? Math.round(totalScore / answeredQuestions.length) : 0;
 
           finalFeedback = {
               ...mockFeedback,
@@ -177,7 +176,7 @@ export function InterviewResults() {
           </div>
           <div className="md:col-span-2">
             <h3 className="font-semibold mb-4">Performance Breakdown</h3>
-             {isPremiumFeature ? (
+             {!hasPremiumAccess ? (
                 <div className="h-[250px] w-full flex items-center justify-center rounded-lg bg-muted/50 p-4">
                   <div className="text-center">
                     <Lock className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -277,7 +276,7 @@ export function InterviewResults() {
                         </div>
                          <div className="space-y-4 relative">
                              <h3 className="font-semibold text-lg">Delivery Analysis</h3>
-                            {isPremiumFeature && (
+                            {!hasPremiumAccess && (
                                 <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-4 z-10 rounded-lg -m-2">
                                     <Lock className="h-8 w-8 text-muted-foreground" />
                                     <p className="mt-2 font-semibold">Unlock Delivery Analysis</p>

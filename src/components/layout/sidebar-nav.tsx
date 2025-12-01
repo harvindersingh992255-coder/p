@@ -25,9 +25,7 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-
-// MOCK: In a real app, this would come from user authentication
-const userPlan = 'Free'; // 'Free', 'Premium', or 'Super'
+import { usePlan } from '@/hooks/use-plan';
 
 const primaryNav = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -46,13 +44,7 @@ const secondaryNav = [
 
 export function SidebarNav() {
   const pathname = usePathname();
-
-  const isPlanSufficient = (requiredPlan: string) => {
-    if (requiredPlan === 'Free') return true;
-    if (requiredPlan === 'Premium' && (userPlan === 'Premium' || userPlan === 'Super')) return true;
-    if (requiredPlan === 'Super' && userPlan === 'Super') return true;
-    return false;
-  };
+  const { isPlanSufficient } = usePlan();
 
   const isActive = (href: string) => {
     // Make dashboard active for root path as well

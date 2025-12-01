@@ -8,9 +8,7 @@ import { generatePepTalk } from '@/ai/flows/confidence-coach';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-
-// MOCK: In a real app, this would come from user authentication
-const userPlan = 'Free'; // 'Free', 'Premium', or 'Super'
+import { usePlan } from '@/hooks/use-plan';
 
 const topics = [
   { id: 'nerves', title: 'Pre-Interview Nerves', icon: Heart },
@@ -19,15 +17,16 @@ const topics = [
 ];
 
 export function ConfidenceCoach() {
+  const { isPlanSufficient } = usePlan();
   const [pepTalk, setPepTalk] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState('');
   const { toast } = useToast();
   
-  const isPremiumFeature = userPlan === 'Free';
+  const hasAccess = isPlanSufficient('Premium');
 
   const handleGeneratePepTalk = async (topic: string) => {
-    if (isPremiumFeature) return;
+    if (!hasAccess) return;
     setIsLoading(true);
     setPepTalk('');
     setSelectedTopic(topic);
@@ -59,7 +58,7 @@ export function ConfidenceCoach() {
         </div>
       </div>
       
-       {isPremiumFeature && (
+       {!hasAccess && (
         <Alert>
           <Lock className="h-4 w-4" />
           <AlertTitle>Premium Feature</AlertTitle>
@@ -70,7 +69,7 @@ export function ConfidenceCoach() {
         </Alert>
       )}
 
-      <Card className={`${isPremiumFeature ? 'opacity-50 pointer-events-none' : ''}`}>
+      <Card className={`${!hasAccess ? 'opacity-50 pointer-events-none' : ''}`}>
         <CardHeader>
           <CardTitle>What's on your mind?</CardTitle>
           <CardDescription>Select a topic to get a personalized pep talk from your AI coach.</CardDescription>

@@ -11,11 +11,10 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 import { Progress } from '@/components/ui/progress';
-
-// MOCK: In a real app, this would come from user authentication
-const userPlan = 'Free'; // 'Free', 'Premium', or 'Super'
+import { usePlan } from '@/hooks/use-plan';
 
 export default function ResumeAnalyzerPage() {
+  const { isPlanSufficient } = usePlan();
   const [resumeText, setResumeText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [analysis, setAnalysis] = useState<AnalyzeResumeOutput | null>(null);
@@ -24,10 +23,10 @@ export default function ResumeAnalyzerPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const isPremiumFeature = userPlan === 'Free';
+  const hasAccess = isPlanSufficient('Premium');
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (isPremiumFeature) return;
+    if (!hasAccess) return;
     const file = event.target.files?.[0];
     if (file) {
       if (file.type === 'application/pdf' || file.type === 'text/plain' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
@@ -62,7 +61,7 @@ export default function ResumeAnalyzerPage() {
   };
 
   const handleAnalyze = async () => {
-    if (isPremiumFeature) return;
+    if (!hasAccess) return;
     if (!resumeText.trim()) {
       toast({
         title: 'Error',
@@ -98,7 +97,7 @@ export default function ResumeAnalyzerPage() {
         Get AI-powered feedback on your resume. For building a new one, head to the <Link href="/resume-builder" className="text-primary underline">Resume Builder</Link>.
       </p>
 
-      {isPremiumFeature && (
+      {!hasAccess && (
         <Alert>
           <Lock className="h-4 w-4" />
           <AlertTitle>Premium Feature</AlertTitle>
@@ -110,7 +109,7 @@ export default function ResumeAnalyzerPage() {
       )}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div className={`space-y-4 ${isPremiumFeature ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className={`space-y-4 ${!hasAccess ? 'opacity-50 pointer-events-none' : ''}`}>
           <Card>
             <CardHeader>
               <CardTitle>Your Resume</CardTitle>
@@ -166,18 +165,18 @@ export default function ResumeAnalyzerPage() {
               />
             </CardContent>
           </Card>
-          <Button onClick={handleAnalyze} disabled={isLoading || isPremiumFeature} size="lg" className="w-full">
+          <Button onClick={handleAnalyze} disabled={isLoading || !hasAccess} size="lg" className="w-full">
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              isPremiumFeature ? <Lock className="mr-2 h-4 w-4" /> : <Wand2 className="mr-2 h-4 w-4" />
+              !hasAccess ? <Lock className="mr-2 h-4 w-4" /> : <Wand2 className="mr-2 h-4 w-4" />
             )}
             Analyze Resume
           </Button>
         </div>
         
         <div className="space-y-4">
-          {isLoading && !isPremiumFeature && (
+          {isLoading && hasAccess && (
             <Card className="flex h-full min-h-[300px] items-center justify-center">
               <CardContent className="text-center">
                 <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
@@ -186,7 +185,7 @@ export default function ResumeAnalyzerPage() {
             </Card>
           )}
 
-          {analysis && !isPremiumFeature && (
+          {analysis && hasAccess && (
             <Card>
               <CardHeader>
                 <CardTitle>Analysis Report</CardTitle>
@@ -227,10 +226,10 @@ export default function ResumeAnalyzerPage() {
             </Card>
           )}
 
-          {(!isLoading && !analysis || isPremiumFeature) && (
+          {(!isLoading && !analysis || !hasAccess) && (
              <Card className="flex h-full min-h-[300px] items-center justify-center">
               <CardContent className="text-center">
-                 {isPremiumFeature ? (
+                 {!hasAccess ? (
                   <>
                     <Lock className="mx-auto h-12 w-12 text-muted-foreground/50" />
                     <p className="mt-4 text-muted-foreground">Upgrade to Premium to see your analysis.</p>

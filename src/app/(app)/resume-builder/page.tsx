@@ -9,11 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 import { PenSquare, Loader2, Wand2, Lock, Copy, Check } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
-
-// MOCK: In a real app, this would come from user authentication
-const userPlan = 'Free'; // 'Free', 'Premium', or 'Super'
+import { usePlan } from '@/hooks/use-plan';
 
 export default function ResumeBuilderPage() {
+  const { isPlanSufficient } = usePlan();
   const [resumeText, setResumeText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [builtResume, setBuiltResume] = useState<BuildResumeOutput | null>(null);
@@ -21,10 +20,10 @@ export default function ResumeBuilderPage() {
   const [hasCopied, setHasCopied] = useState(false);
   const { toast } = useToast();
 
-  const isPremiumFeature = userPlan === 'Free';
+  const hasAccess = isPlanSufficient('Premium');
 
   const handleBuild = async () => {
-    if (isPremiumFeature) return;
+    if (!hasAccess) return;
     if (!resumeText.trim()) {
       toast({
         title: 'Error',
@@ -69,7 +68,7 @@ export default function ResumeBuilderPage() {
         Provide your existing resume or key details, and let our AI craft a professional, optimized version for you.
       </p>
 
-      {isPremiumFeature && (
+      {!hasAccess && (
         <Alert>
           <Lock className="h-4 w-4" />
           <AlertTitle>Premium Feature</AlertTitle>
@@ -81,7 +80,7 @@ export default function ResumeBuilderPage() {
       )}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div className={`space-y-4 ${isPremiumFeature ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className={`space-y-4 ${!hasAccess ? 'opacity-50 pointer-events-none' : ''}`}>
           <Card>
             <CardHeader>
               <CardTitle>Your Information</CardTitle>
@@ -110,11 +109,11 @@ export default function ResumeBuilderPage() {
               />
             </CardContent>
           </Card>
-          <Button onClick={handleBuild} disabled={isLoading || isPremiumFeature} size="lg" className="w-full">
+          <Button onClick={handleBuild} disabled={isLoading || !hasAccess} size="lg" className="w-full">
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              isPremiumFeature ? <Lock className="mr-2 h-4 w-4" /> : <Wand2 className="mr-2 h-4 w-4" />
+              !hasAccess ? <Lock className="mr-2 h-4 w-4" /> : <Wand2 className="mr-2 h-4 w-4" />
             )}
             Build My Resume
           </Button>
@@ -127,7 +126,7 @@ export default function ResumeBuilderPage() {
               <CardDescription>The AI-crafted version of your resume will appear below.</CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading && !isPremiumFeature && (
+              {isLoading && hasAccess && (
                 <div className="flex h-full min-h-[300px] items-center justify-center">
                   <div className="text-center">
                     <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
@@ -136,7 +135,7 @@ export default function ResumeBuilderPage() {
                 </div>
               )}
 
-              {builtResume && !isPremiumFeature && (
+              {builtResume && hasAccess && (
                 <div className="relative">
                   <Button
                     variant="ghost"
@@ -152,10 +151,10 @@ export default function ResumeBuilderPage() {
                 </div>
               )}
 
-              {(!isLoading && !builtResume || isPremiumFeature) && (
+              {(!isLoading && !builtResume || !hasAccess) && (
                  <div className="flex h-full min-h-[300px] items-center justify-center">
                   <div className="text-center">
-                    {isPremiumFeature ? (
+                    {!hasAccess ? (
                       <>
                         <Lock className="mx-auto h-12 w-12 text-muted-foreground/50" />
                         <p className="mt-4 text-muted-foreground">Upgrade to Premium to build your resume.</p>
