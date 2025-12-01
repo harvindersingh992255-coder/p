@@ -5,7 +5,6 @@ import { analyzeInterviewResponse } from '@/ai/flows/ai-performance-feedback';
 import { bodyLanguageAnalysis } from '@/ai/flows/body-language-analysis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, MessageCircle, Play, Smile, ThumbsDown, ThumbsUp, BrainCircuit, Lock, AlertCircle } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
@@ -205,108 +204,51 @@ export function InterviewResults() {
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader>
+      <div className="space-y-6">
+        <CardHeader className="px-0">
           <CardTitle>Question-by-Question Feedback</CardTitle>
           <CardDescription>Detailed analysis for each of your answers.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-            {feedback.questions.map((item: any, index: number) => (
-              <AccordionItem value={`item-${index}`} key={index}>
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex justify-between items-center w-full pr-4">
-                    <span className="text-left font-medium">Question {index + 1}: <span className="text-muted-foreground font-normal italic">"{item.question.substring(0,50)}..."</span></span>
-                    {item.feedback ? (
-                        <Badge variant={item.feedback.score > 80 ? "default" : "secondary"} className={`${item.feedback.score > 80 ? 'bg-primary/20 text-primary' : 'bg-secondary/50 text-secondary-foreground'} border-none`}>
+        <div className="space-y-6">
+          {feedback.questions.map((item: any, index: number) => (
+            <Card key={index} className="overflow-hidden">
+                <CardHeader className="flex flex-row justify-between items-center bg-muted/30">
+                    <div>
+                        <p className="text-sm text-muted-foreground">Question {index + 1}</p>
+                        <CardTitle className="text-xl">"{item.question}"</CardTitle>
+                    </div>
+                     {item.feedback ? (
+                        <Badge variant={item.feedback.score > 80 ? "default" : "secondary"} className={`text-base ${item.feedback.score > 80 ? 'bg-primary/20 text-primary' : 'bg-secondary/50 text-secondary-foreground'} border-none`}>
                             Score: {item.feedback.score}%
                         </Badge>
                     ) : (
                         <Badge variant="destructive">Not Answered</Badge>
                     )}
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="space-y-6 pt-4">
-                  <blockquote className="border-l-2 pl-6 italic text-muted-foreground">"{item.question}"</blockquote>
-                  
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
                   {!item.feedback ? (
-                      <div className="text-center py-8 bg-muted/30 rounded-lg">
+                      <div className="text-center py-12 bg-muted/30 rounded-lg">
                           <AlertCircle className="mx-auto h-8 w-8 text-muted-foreground" />
                           <p className="mt-2 text-muted-foreground">You did not provide an answer for this question.</p>
                       </div>
                   ) : (
                     <>
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <Card className="bg-muted/30">
-                            <CardHeader>
-                              <CardTitle className="text-lg">Content Analysis</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex gap-4">
-                                    <ThumbsUp className="text-green-500 h-5 w-5 mt-1 shrink-0"/>
-                                    <div>
-                                        <h4 className="font-semibold">Strengths</h4>
-                                        <p className="text-sm text-muted-foreground">{item.feedback.strengths}</p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-4">
-                                    <ThumbsDown className="text-red-500 h-5 w-5 mt-1 shrink-0"/>
-                                    <div>
-                                        <h4 className="font-semibold">Areas for Improvement</h4>
-                                        <p className="text-sm text-muted-foreground">{item.feedback.weaknesses}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                         <Card className="bg-muted/30 relative overflow-hidden">
-                            <CardHeader>
-                              <CardTitle className="text-lg">Delivery Analysis</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {isPremiumFeature && (
-                                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-4 z-10">
-                                        <Lock className="h-8 w-8 text-muted-foreground" />
-                                        <p className="mt-2 font-semibold">Unlock Body Language Analysis</p>
-                                        <p className="text-sm text-muted-foreground">Upgrade to Premium for feedback on posture, eye contact, and more.</p>
-                                        <Button asChild size="sm" className="mt-4">
-                                            <Link href="/pricing">Upgrade Plan</Link>
-                                        </Button>
-                                    </div>
-                                )}
-                                {item.bodyLanguageFeedback && <div className="flex gap-4">
-                                    <Smile className="text-yellow-500 h-5 w-5 mt-1 shrink-0"/>
-                                    <div>
-                                        <h4 className="font-semibold">Body Language</h4>
-                                        <p className="text-sm text-muted-foreground">{item.bodyLanguageFeedback}</p>
-                                    </div>
-                                </div>}
-                                 <div className="flex gap-4">
-                                    <MessageCircle className="text-blue-500 h-5 w-5 mt-1 shrink-0"/>
-                                    <div>
-                                        <h4 className="font-semibold">AI Suggestion</h4>
-                                        <p className="text-sm text-muted-foreground">{item.feedback.improvementSuggestions}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                      </div>
-                      
                       {item.videoUrl && (
-                        <div className="pt-4">
+                        <div>
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button variant="outline">
                                 <Play className="mr-2 h-4 w-4" />
-                                Playback Your Answer
+                                Review Your Answer
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
+                            <DialogContent className="max-w-3xl">
                                 <DialogHeader>
                                     <DialogTitle>Your Answer Playback</DialogTitle>
                                 </DialogHeader>
-                                <div className="mt-4">
+                                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <video src={item.videoUrl} controls className="w-full rounded-lg" />
-                                    <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                                    <div className="p-4 bg-muted/50 rounded-lg max-h-[400px] overflow-y-auto">
                                         <h4 className="font-semibold mb-2">Your transcribed answer:</h4>
                                         <p className="text-sm text-muted-foreground italic">"{item.userAnswer}"</p>
                                     </div>
@@ -315,14 +257,59 @@ export function InterviewResults() {
                           </Dialog>
                         </div>
                       )}
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                            <h3 className="font-semibold text-lg">Content Analysis</h3>
+                            <div className="flex gap-4">
+                                <ThumbsUp className="text-green-500 h-5 w-5 mt-1 shrink-0"/>
+                                <div>
+                                    <h4 className="font-semibold">Strengths</h4>
+                                    <p className="text-sm text-muted-foreground">{item.feedback.strengths}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <ThumbsDown className="text-red-500 h-5 w-5 mt-1 shrink-0"/>
+                                <div>
+                                    <h4 className="font-semibold">Areas for Improvement</h4>
+                                    <p className="text-sm text-muted-foreground">{item.feedback.weaknesses}</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div className="space-y-4 relative">
+                             <h3 className="font-semibold text-lg">Delivery Analysis</h3>
+                            {isPremiumFeature && (
+                                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-4 z-10 rounded-lg -m-2">
+                                    <Lock className="h-8 w-8 text-muted-foreground" />
+                                    <p className="mt-2 font-semibold">Unlock Delivery Analysis</p>
+                                    <p className="text-sm text-muted-foreground">Upgrade to get feedback on body language, tone, and more.</p>
+                                    <Button asChild size="sm" className="mt-4">
+                                        <Link href="/pricing">Upgrade Plan</Link>
+                                    </Button>
+                                </div>
+                            )}
+                            {item.bodyLanguageFeedback && <div className="flex gap-4">
+                                <Smile className="text-yellow-500 h-5 w-5 mt-1 shrink-0"/>
+                                <div>
+                                    <h4 className="font-semibold">Body Language</h4>
+                                    <p className="text-sm text-muted-foreground">{item.bodyLanguageFeedback}</p>
+                                </div>
+                            </div>}
+                             <div className="flex gap-4">
+                                <MessageCircle className="text-blue-500 h-5 w-5 mt-1 shrink-0"/>
+                                <div>
+                                    <h4 className="font-semibold">AI Suggestion for Improvement</h4>
+                                    <p className="text-sm text-muted-foreground">{item.feedback.improvementSuggestions}</p>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
                     </>
                   )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </CardContent>
-      </Card>
+                </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
