@@ -19,7 +19,7 @@ const plans = [
   {
     name: 'Premium',
     price: '₹149',
-    pricePeriod: '/ year',
+    pricePeriod: '/ month',
     description: 'Unlock your full potential with advanced features and unlimited practice.',
     features: [
       'Unlimited interviews',
@@ -34,7 +34,7 @@ const plans = [
   {
     name: 'Super',
     price: '₹249',
-    pricePeriod: '/ year',
+    pricePeriod: '/ month',
     description: 'For professionals who want personalized coaching and every advantage.',
     features: [
       'All Premium features',
