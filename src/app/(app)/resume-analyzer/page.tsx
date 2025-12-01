@@ -1,25 +1,54 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { analyzeResume, AnalyzeResumeOutput } from '@/ai/flows/resume-analyzer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Loader2, Wand2, ArrowRight } from 'lucide-react';
+import { FileText, Loader2, Wand2, UploadCloud, FileCheck2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function ResumeAnalyzerPage() {
   const [resumeText, setResumeText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [analysis, setAnalysis] = useState<AnalyzeResumeOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [fileName, setFileName] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type === 'application/pdf' || file.type === 'text/plain') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target?.result as string;
+          setResumeText(text);
+          setFileName(file.name);
+          toast({
+            title: 'File Uploaded',
+            description: `${file.name} has been successfully read.`,
+          });
+        };
+        reader.readAsText(file);
+      } else {
+        toast({
+          title: 'Unsupported File Type',
+          description: 'Please upload a .pdf or .txt file.',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
 
   const handleAnalyze = async () => {
     if (!resumeText.trim()) {
       toast({
         title: 'Error',
-        description: 'Please paste your resume text before analyzing.',
+        description: 'Please paste or upload your resume before analyzing.',
         variant: 'destructive',
       });
       return;
@@ -27,6 +56,8 @@ export default function ResumeAnalyzerPage() {
     setIsLoading(true);
     setAnalysis(null);
     try {
+      // In a real app, you'd parse PDF/DOCX server-side for better results.
+      // Here we assume plain text extraction is sufficient.
       const result = await analyzeResume({ resumeText, jobDescription });
       setAnalysis(result);
     } catch (error) {
@@ -48,7 +79,7 @@ export default function ResumeAnalyzerPage() {
         <h1 className="text-3xl font-bold tracking-tight">AI Resume Analyzer</h1>
       </div>
       <p className="text-muted-foreground">
-        Paste your resume and an optional job description to get AI-powered feedback and improvements.
+        Paste your resume, upload a file, and add an optional job description to get AI-powered feedback.
       </p>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -56,13 +87,42 @@ export default function ResumeAnalyzerPage() {
           <Card>
             <CardHeader>
               <CardTitle>Your Resume</CardTitle>
+              <CardDescription>You can either paste your resume or upload a file.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <div 
+                className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {fileName ? (
+                    <span className="flex items-center justify-center gap-2 font-semibold text-primary"><FileCheck2 className="h-4 w-4"/> {fileName}</span>
+                  ) : (
+                    "Click to upload a .pdf or .txt file"
+                  )}
+                </p>
+                <Input 
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.txt"
+                  onChange={handleFileChange}
+                />
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex-grow border-t border-muted-foreground/30"></div>
+                <span className="text-xs text-muted-foreground">OR</span>
+                <div className="flex-grow border-t border-muted-foreground/30"></div>
+              </div>
               <Textarea
                 placeholder="Paste your resume content here..."
-                className="h-64 min-h-64"
+                className="h-60 min-h-60"
                 value={resumeText}
-                onChange={(e) => setResumeText(e.target.value)}
+                onChange={(e) => {
+                  setResumeText(e.target.value);
+                  setFileName('');
+                }}
               />
             </CardContent>
           </Card>

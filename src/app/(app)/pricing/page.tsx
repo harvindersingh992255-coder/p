@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check } from 'lucide-react';
+import { Check, Gem } from 'lucide-react';
 
 const plans = [
   {
@@ -51,7 +51,8 @@ export default function PricingPage() {
   return (
     <div className="container mx-auto py-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight">Find the perfect plan for you</h1>
+        <Gem className="h-12 w-12 text-primary mx-auto mb-4" />
+        <h1 className="text-4xl font-bold tracking-tight">Flexible Plans for Your Career Goals</h1>
         <p className="text-lg text-muted-foreground mt-2">
           Start for free, then upgrade to unlock your full potential.
         </p>
@@ -59,7 +60,7 @@ export default function PricingPage() {
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         {plans.map((plan) => (
-          <Card key={plan.name} className={`flex flex-col ${plan.isPrimary ? 'border-primary ring-2 ring-primary' : ''}`}>
+          <Card key={plan.name} className={`flex flex-col transform hover:-translate-y-2 transition-transform duration-300 ${plan.isPrimary ? 'border-primary ring-2 ring-primary shadow-lg shadow-primary/20' : 'hover:shadow-xl'}`}>
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">{plan.name}</CardTitle>
               <p className="text-4xl font-bold">

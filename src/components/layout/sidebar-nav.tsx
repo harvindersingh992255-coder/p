@@ -85,9 +85,9 @@ export function SidebarNav() {
         <SidebarMenu>
            <SidebarMenuItem>
             <Link href="/pricing" passHref>
-              <SidebarMenuButton as="a" isActive={isActive('/pricing')} tooltip="Pricing">
+              <SidebarMenuButton as="a" isActive={isActive('/pricing')} tooltip="Subscriptions">
                 <Gem />
-                <span>Pricing</span>
+                <span>Subscriptions</span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
