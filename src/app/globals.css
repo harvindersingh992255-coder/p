@@ -27,7 +27,6 @@ body {
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 226 70% 40%;
-    --radius: 0.5rem;
     --chart-1: 226 70% 50%;
     --chart-2: 160 80% 40%;
     --chart-3: 30 80% 55%;
@@ -44,9 +43,9 @@ body {
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 220 60% 10%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 220 50% 15%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
@@ -68,7 +67,7 @@ body {
     --chart-3: 30 70% 65%;
     --chart-4: 280 65% 70%;
     --chart-5: 340 75% 65%;
-    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-background: 220 60% 10%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 226 70% 50%;
     --sidebar-primary-foreground: 210 40% 98%;
