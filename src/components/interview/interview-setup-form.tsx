@@ -28,10 +28,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Sparkles, ArrowRight } from 'lucide-react';
 
 const formSchema = z.object({
+  dreamCompany: z.string().optional(),
   jobRole: z.string().min(2, { message: 'Job role must be at least 2 characters.' }),
   industry: z.string().min(2, { message: 'Industry must be at least 2 characters.' }),
   interviewType: z.string({ required_error: 'Please select an interview type.' }),
-  difficulty: z.number().min(1).max(5).default(3),
+  difficulty: z.number().min(1).max(10).default(5),
+  interviewLength: z.number().min(3).max(10).default(5),
   customFocus: z.array(z.string()).optional(),
 });
 
@@ -49,9 +51,11 @@ export function InterviewSetupForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      dreamCompany: '',
       jobRole: '',
       industry: '',
-      difficulty: 3,
+      difficulty: 5,
+      interviewLength: 5,
       customFocus: ['technical', 'behavioral'],
     },
   });
@@ -108,6 +112,20 @@ export function InterviewSetupForm() {
             </div>
 
             <FormField
+                control={form.control}
+                name="dreamCompany"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dream Company (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Google" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+            <FormField
               control={form.control}
               name="interviewType"
               render={({ field }) => (
@@ -131,24 +149,44 @@ export function InterviewSetupForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="difficulty"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Difficulty Level: {field.value}</FormLabel>
-                  <FormControl>
-                    <Slider
-                      min={1}
-                      max={5}
-                      step={1}
-                      value={[field.value]}
-                      onValueChange={(vals) => field.onChange(vals[0])}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <FormField
+                control={form.control}
+                name="difficulty"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Difficulty Level: {field.value}/10</FormLabel>
+                    <FormControl>
+                        <Slider
+                        min={1}
+                        max={10}
+                        step={1}
+                        value={[field.value]}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                        />
+                    </FormControl>
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="interviewLength"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Interview Length: {field.value} questions</FormLabel>
+                    <FormControl>
+                        <Slider
+                        min={3}
+                        max={10}
+                        step={1}
+                        value={[field.value]}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                        />
+                    </FormControl>
+                    </FormItem>
+                )}
+                />
+            </div>
 
             <FormField
               control={form.control}
@@ -156,7 +194,7 @@ export function InterviewSetupForm() {
               render={() => (
                 <FormItem>
                   <div className="mb-4">
-                    <FormLabel className="text-base">Custom Focus Areas</FormLabel>
+                    <FormLabel className="text-base">Skills to Focus On</FormLabel>
                     <FormDescription>
                       Select areas you want the AI to focus on during feedback.
                     </FormDescription>
