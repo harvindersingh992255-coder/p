@@ -16,38 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-const mockHistory = [
-  {
-    id: 'sess_1',
-    date: '2024-07-20',
-    jobRole: 'Frontend Developer',
-    overallScore: 88,
-  },
-  {
-    id: 'sess_2',
-    date: '2024-07-18',
-    jobRole: 'Product Manager',
-    overallScore: 76,
-  },
-  {
-    id: 'sess_3',
-    date: '2024-07-15',
-    jobRole: 'UI/UX Designer',
-    overallScore: 92,
-  },
-  {
-    id: 'sess_4',
-    date: '2024-07-12',
-    jobRole: 'Data Analyst',
-    overallScore: 81,
-  },
-   {
-    id: 'sess_5',
-    date: '2024-07-10',
-    jobRole: 'Backend Developer',
-    overallScore: 79,
-  },
-];
+const mockHistory: { id: string, date: string, jobRole: string, overallScore: number }[] = [];
 
 export default function HistoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -108,7 +77,7 @@ export default function HistoryPage() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={4} className="h-24 text-center">
-                    No sessions found.
+                    No interview sessions found.
                   </TableCell>
                 </TableRow>
               )}

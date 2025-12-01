@@ -39,15 +39,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarHeader>
           <Link href="/dashboard" className="flex items-center gap-2">
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-8 w-8 text-primary"
-            >
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-8 w-8 text-primary"
+              >
               <path d="M12 2L2 7l10 5 10-5-10-5z" />
               <path d="M2 17l10 5 10-5" />
               <path d="M2 12l10 5 10-5" />
@@ -62,15 +62,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3 border-t p-3">
             <Avatar className="h-9 w-9">
               <AvatarImage
-                src="https://picsum.photos/seed/user-avatar/100/100"
+                src=""
                 data-ai-hint="person face"
                 alt="User Avatar"
               />
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
             <div className="flex flex-col text-sm">
-              <span className="font-medium">John Doe</span>
-              <span className="text-muted-foreground">john.doe@example.com</span>
+              <span className="font-medium">Guest User</span>
+              <span className="text-muted-foreground">Login to save progress</span>
             </div>
             <Button variant="ghost" size="icon" className="ml-auto h-8 w-8">
               <LogOut className="h-4 w-4" />
@@ -83,7 +83,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2 md:hidden">
             {isClient && <SidebarTrigger />}
             <Link href="/dashboard" className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-6 w-6 text-primary"
+                  >
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg>
                 <span className="text-lg font-bold">SkillUp mock</span>
             </Link>
           </div>
@@ -101,7 +114,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuTrigger asChild>
                 <Avatar className="h-9 w-9 cursor-pointer">
                   <AvatarImage
-                    src="https://picsum.photos/seed/user-avatar/100/100"
+                    src=""
                     data-ai-hint="person face"
                     alt="User Avatar"
                   />

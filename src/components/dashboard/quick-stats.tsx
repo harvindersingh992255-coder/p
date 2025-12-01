@@ -4,27 +4,27 @@ import { Activity, BarChart, CheckCircle, Target } from 'lucide-react';
 const stats = [
   {
     title: 'Total Sessions',
-    value: '12',
+    value: '0',
     icon: Activity,
-    change: '+2 this week',
+    change: 'Complete an interview to start',
   },
   {
     title: 'Average Score',
-    value: '82%',
+    value: '0%',
     icon: Target,
-    change: '+5% improvement',
+    change: 'Your score will appear here',
   },
   {
     title: 'Success Rate',
-    value: '75%',
+    value: '0%',
     icon: CheckCircle,
-    change: 'vs. 70% last week',
+    change: 'Based on your performance',
   },
   {
     title: 'Practice Streak',
-    value: '5 days',
+    value: '0 days',
     icon: BarChart,
-    change: 'Keep it going!',
+    change: 'Start practicing today!',
   },
 ];
 

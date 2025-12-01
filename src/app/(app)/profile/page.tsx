@@ -38,15 +38,15 @@ export default function ProfilePage() {
     resolver: zodResolver(profileSchema),
     // MOCK: In a real app, this data would be fetched for the logged-in user
     defaultValues: {
-      id: 'user-123',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
+      id: '',
+      name: '',
+      email: '',
       avatarUrl: '',
-      educationLevel: 'Bachelors Degree',
-      targetJobRole: 'Software Engineer',
-      targetIndustry: 'Technology',
-      experienceLevel: 5,
-      careerGoals: 'To become a senior engineer and lead a team of developers on impactful projects.',
+      educationLevel: '',
+      targetJobRole: '',
+      targetIndustry: '',
+      experienceLevel: 0,
+      careerGoals: '',
     },
   });
 
