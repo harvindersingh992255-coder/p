@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'SkillUp Ace',
+  title: 'SkillUp mock',
   description: 'AI-Powered Mock Interview Practice',
 };
 

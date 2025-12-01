@@ -42,7 +42,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <path d="M2 17l10 5 10-5" />
               <path d="M2 12l10 5 10-5" />
             </svg>
-            <h1 className="text-xl font-bold text-foreground">SkillUp Ace</h1>
+            <h1 className="text-xl font-bold text-foreground">SkillUp mock</h1>
           </Link>
         </SidebarHeader>
         <SidebarContent className="p-0">
@@ -74,7 +74,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarTrigger />
             <Link href="/dashboard" className="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
-                <span className="text-lg font-bold">SkillUp Ace</span>
+                <span className="text-lg font-bold">SkillUp mock</span>
             </Link>
           </div>
           
