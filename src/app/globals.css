@@ -8,13 +8,13 @@ body {
 
 @layer base {
   :root {
-    --background: 222 47% 6%;
+    --background: 224 71% 4%; /* Deep space blue */
     --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
+    --card: 224 71% 9%; /* Slightly lighter space blue for cards */
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
+    --popover: 224 71% 9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 262.1 83.3% 57.8%;
+    --primary: 262.1 83.3% 57.8%; /* Vibrant violet */
     --primary-foreground: 210 40% 98%;
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
@@ -24,7 +24,7 @@ body {
     --accent-foreground: 210 40% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
+    --border: 217 33% 25%; /* Brighter border for better contrast */
     --input: 217 33% 17%;
     --ring: 262.1 83.3% 57.8%;
     --chart-1: 217 91% 55%;
@@ -32,7 +32,7 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 222 47% 7%;
+    --sidebar-background: 224 71% 6%; /* Consistent sidebar bg */
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 224 71% 4%;
@@ -43,13 +43,13 @@ body {
   }
 
   .dark {
-    --background: 222 47% 6%;
+    --background: 224 71% 4%; /* Deep space blue */
     --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
+    --card: 224 71% 9%; /* Slightly lighter space blue for cards */
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
+    --popover: 224 71% 9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 262.1 83.3% 57.8%;
+    --primary: 262.1 83.3% 57.8%; /* Vibrant violet */
     --primary-foreground: 210 40% 98%;
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
@@ -59,7 +59,7 @@ body {
     --accent-foreground: 210 40% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
+    --border: 217 33% 25%; /* Brighter border for better contrast */
     --input: 217 33% 17%;
     --ring: 262.1 83.3% 57.8%;
     --chart-1: 217 91% 55%;
@@ -67,7 +67,7 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 222 47% 7%;
+    --sidebar-background: 224 71% 6%; /* Consistent sidebar bg */
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 224 71% 4%;
