@@ -79,8 +79,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              Upgrade
+            <Button asChild variant="outline" size="sm">
+                <Link href="/pricing">Upgrade</Link>
             </Button>
             <Button variant="ghost" size="icon">
               <Bell className="h-5 w-5" />
