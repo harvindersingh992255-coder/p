@@ -1,0 +1,201 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { generateInterviewQuestions } from '@/ai/flows/generate-interview-questions';
+import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Mic, MicOff, Video, VideoOff, Square, Loader2, ArrowRight, SkipForward } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+
+const mockQuestions = [
+    "Tell me about a time you faced a challenge at work.",
+    "What are your biggest strengths and weaknesses?",
+    "Where do you see yourself in 5 years?",
+    "Why do you want to work for this company?",
+    "Describe a project you are proud of."
+];
+
+
+export function ActiveInterview() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+  const { text, startListening, stopListening, isListening, hasRecognitionSupport } = useSpeechRecognition();
+  
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCameraOn, setIsCameraOn] = useState(false);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      const jobRole = searchParams.get('jobRole') || 'Software Engineer';
+      const industry = searchParams.get('industry') || 'Technology';
+      try {
+        // const result = await generateInterviewQuestions({ jobRole, industry, numQuestions: 5 });
+        // setQuestions(result.questions);
+        setQuestions(mockQuestions); // Using mock questions for now
+      } catch (error) {
+        console.error("Failed to generate questions:", error);
+        toast({ title: "Error", description: "Could not fetch interview questions. Using defaults.", variant: "destructive" });
+        setQuestions(mockQuestions);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchQuestions();
+  }, [searchParams, toast]);
+
+  const toggleCamera = async () => {
+    if (isCameraOn) {
+      const stream = videoRef.current?.srcObject as MediaStream;
+      stream?.getTracks().forEach(track => track.stop());
+      videoRef.current!.srcObject = null;
+      setIsCameraOn(false);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        videoRef.current!.srcObject = stream;
+        setIsCameraOn(true);
+        recordedChunksRef.current = [];
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                recordedChunksRef.current.push(event.data);
+            }
+        };
+      } catch (error) {
+        console.error("Error accessing camera:", error);
+        toast({ title: "Camera Error", description: "Could not access your camera.", variant: "destructive" });
+      }
+    }
+  };
+  
+  const handleStartRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'inactive') {
+        mediaRecorderRef.current.start();
+    }
+    startListening();
+  };
+
+  const handleStopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+    }
+    stopListening();
+    // Here you would save the text and the recordedChunksRef.current
+  };
+  
+  const handleNextQuestion = () => {
+    if(isListening) handleStopRecording();
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      // End of interview
+      router.push('/interview/results/some-session-id');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="text-lg text-muted-foreground">Preparing your interview...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full max-w-4xl mx-auto">
+      <Progress value={((currentQuestionIndex + 1) / questions.length) * 100} className="w-full mb-4" />
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Question {currentQuestionIndex + 1} of {questions.length}</h2>
+        <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={toggleCamera}>
+                {isCameraOn ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
+            </Button>
+            {/* Timer placeholder */}
+            <div className="text-lg font-mono p-2 rounded-md bg-muted">02:30</div>
+        </div>
+      </div>
+      
+      <Card className="flex-grow flex flex-col">
+        <CardContent className="p-6 flex-grow flex flex-col gap-6">
+            <p className="text-xl font-medium text-center">{questions[currentQuestionIndex]}</p>
+            <div className="relative flex-grow bg-muted rounded-lg overflow-hidden border">
+                <video ref={videoRef} autoPlay muted className="w-full h-full object-cover"></video>
+                {!isCameraOn && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <VideoOff className="h-16 w-16 text-white/50" />
+                    </div>
+                )}
+            </div>
+            {isListening && <p className="text-sm text-muted-foreground italic text-center p-2 border rounded-md">{text || "Listening..."}</p>}
+        </CardContent>
+        <CardFooter className="flex-col sm:flex-row justify-between items-center gap-4 p-4 border-t">
+          <div className="flex gap-2">
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive">
+                        <Square className="mr-2 h-4 w-4" />
+                        End Interview
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure you want to end the interview?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This will end your current session. You'll be taken to the results page.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => router.push('/interview/results/some-session-id')}>
+                        End Interview
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            <Button variant="outline" onClick={handleNextQuestion}>
+                <SkipForward className="mr-2 h-4 w-4" />
+                Skip
+            </Button>
+          </div>
+          <div className="flex items-center gap-4">
+              <Button 
+                onClick={isListening ? handleStopRecording : handleStartRecording} 
+                disabled={!hasRecognitionSupport || !isCameraOn}
+                size="lg"
+                className="w-36"
+              >
+                {isListening ? (
+                  <>
+                    <MicOff className="mr-2 h-4 w-4 animate-pulse" />
+                    Stop
+                  </>
+                ) : (
+                  <>
+                    <Mic className="mr-2 h-4 w-4" />
+                    Answer
+                  </>
+                )}
+              </Button>
+              <Button size="lg" onClick={handleNextQuestion}>
+                Next Question
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}
