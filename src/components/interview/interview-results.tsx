@@ -82,40 +82,57 @@ export function InterviewResults() {
       setIsLoading(true);
       const sessionDataString = localStorage.getItem('latestInterviewSession');
       
+      let finalFeedback;
+
       if (sessionDataString) {
         const sessionData: InterviewSession = JSON.parse(sessionDataString);
         setSession(sessionData);
 
-        // In a real app, you'd call AI flows for each question
-        // For this demo, we'll simulate it with mock data
-        const processedQuestions = sessionData.questions.map((q, i) => {
-            if (!q.userAnswer) {
-                return { ...q, feedback: null, bodyLanguageFeedback: null };
-            }
-            // Use mock feedback for answered questions
-            return {
-                ...q,
-                ...mockFeedback.questions[i % 2], // Cycle through mock feedbacks
-                question: q.question, // Keep original question
-                userAnswer: q.userAnswer,
-            };
-        });
-        
-        const finalFeedback = {
-            ...mockFeedback,
-            questions: processedQuestions,
-        };
+        const answeredQuestions = sessionData.questions.filter(q => q.userAnswer && q.userAnswer.trim() !== '');
 
+        if (answeredQuestions.length > 0) {
+          const processedQuestions = sessionData.questions.map((q, i) => {
+              if (!q.userAnswer || q.userAnswer.trim() === '') {
+                  return { ...q, feedback: null, bodyLanguageFeedback: null };
+              }
+              // Use mock feedback for answered questions
+              const mockQuestionFeedback = mockFeedback.questions[i % 2];
+              return {
+                  ...q,
+                  feedback: mockQuestionFeedback.feedback,
+                  bodyLanguageFeedback: mockQuestionFeedback.bodyLanguageFeedback,
+              };
+          });
+
+          // Calculate average score from answered questions
+          const totalScore = processedQuestions.reduce((sum, q) => sum + (q.feedback?.score || 0), 0);
+          const overallScore = Math.round(totalScore / answeredQuestions.length);
+
+          finalFeedback = {
+              ...mockFeedback,
+              questions: processedQuestions,
+              overallScore: overallScore,
+          };
+        } else {
+           // No questions answered
+           finalFeedback = {
+            ...mockFeedback,
+            questions: sessionData.questions,
+            overallScore: 0,
+            breakdown: mockFeedback.breakdown.map(b => ({ ...b, score: 0})),
+          };
+        }
+        
         setFeedback(finalFeedback);
 
       } else {
-        // Fallback to mock if nothing in local storage
+        // Fallback to mock if nothing in local storage, assuming some answers.
         setFeedback(mockFeedback);
       }
       
       setTimeout(() => {
         setIsLoading(false);
-      }, 2000);
+      }, 1000); // Reduced delay for faster feedback appearance
     };
     getFeedback();
   }, []);
@@ -195,7 +212,7 @@ export function InterviewResults() {
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="w-full">
-            {(session?.questions || feedback.questions).map((item: any, index: number) => (
+            {feedback.questions.map((item: any, index: number) => (
               <AccordionItem value={`item-${index}`} key={index}>
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex justify-between items-center w-full pr-4">
